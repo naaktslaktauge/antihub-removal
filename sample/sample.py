@@ -7,14 +7,16 @@ import faiss
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from src.antihub_remover import AntihubRemover
 
+
 def validate(index, xb_small, id_small, xq, gt):
     # execute search and calculate recall@1
     index.reset()
     index.add(xb_small)
-    _, I = index.search(xq, 1)
-    I = id_small[I]
-    recall_1 = (I[:, :1] == gt[:, :1]).sum() / gt.shape[0]
+    _, I_NN = index.search(xq, 1)
+    I_NN = id_small[I_NN]
+    recall_1 = (I_NN[:, :1] == gt[:, :1]).sum() / gt.shape[0]
     return recall_1
+
 
 # fix seed
 np.random.seed(42)

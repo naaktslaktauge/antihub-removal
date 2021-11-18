@@ -8,5 +8,4 @@ $ cd antihub-removal
 $ conda env create -f env.yml
 $ conda activate antihub-removal
 $ python sample/sample.py
-
 ```
