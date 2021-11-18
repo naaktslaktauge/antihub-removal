@@ -7,7 +7,7 @@ class AntihubRemover:
         '''
         [INPUT]
         - k [integer]: The only hyperparameter of anti-hub removal.
-            This specifies the number of vectors 
+            This specifies the number of vectors
             which are considered as NNs in the calculation of hubness.
             Ex. 16
         - d [integer]: The dimensionality of input vectors.
@@ -37,8 +37,9 @@ class AntihubRemover:
             cfg.device = gpu
             configs.append(cfg)
 
-        indexes = [faiss.GpuIndexFlatL2(resources[i], self.d, configs[i])
-                    for i in range(len(self.gpu_list))]
+        indexes = [
+            faiss.GpuIndexFlatL2(resources[i], self.d, configs[i])
+            for i in range(len(self.gpu_list))]
         self.index = faiss.IndexReplicas()
         for index in indexes:
             self.index.addIndex(index)
@@ -55,7 +56,7 @@ class AntihubRemover:
         D = np.concatenate(D)
         I = np.concatenate(I)
         return D, I
-    
+
     def _clustering(self, xt, xb, n_cluster):
         kmeans = faiss.Kmeans(k=n_cluster, niter=60, d=self.d)
         kmeans.train(np.ascontiguousarray(xt))
@@ -81,7 +82,7 @@ class AntihubRemover:
         for i in I:
             hubness[i] += 1
         return hubness
-        
+
     def remove_antihub(self, xb, alpha=0.5, return_vecs=False):
         '''
         Pure anti-hub removal.
@@ -91,10 +92,10 @@ class AntihubRemover:
         - alpha [float, 0 < alpha < 1, default 0.5]: The size of database after the anti-hub removal (xb').
             When you set alpha to 0.5, half of vectors are removed from the original database.
             |xb'| = alpha * |xb|
-        - return_vecs [bool, default False]: 
+        - return_vecs [bool, default False]:
             If True, it returns 1) the reduced database and 2) the IDs of remained vectors.
             If False, only IDs is returned.
-        
+
         [OUTPUT]
         - hub_id [np.array<int64>]: The IDs of remained vectors.
         - reduced_xb [np.array<float64>]: The reduced database.
@@ -127,12 +128,12 @@ class AntihubRemover:
         - alpha [float, 0 < alpha < 1, default 0.5]: The size of database after the anti-hub removal (xb').
             When you set alpha to 0.5, half of vectors are removed from the original database.
             |xb'| = alpha * |xb|
-        - n_cluster [int]: The number of clusters. 
+        - n_cluster [int]: The number of clusters.
             The more clusters you use, the faster you can calculate hubness.
-        - return_vecs [bool, default False]: 
+        - return_vecs [bool, default False]:
             If True, it returns 1) the reduced database and 2) the IDs of remained vectors.
             If False, only IDs is returned.
-        
+
         [OUTPUT]
         - hub_id [np.array<int64>]: The IDs of remained vectors.
         - reduced_xb [np.array<float64>]: The reduced database.
@@ -140,8 +141,8 @@ class AntihubRemover:
         clusters = self._clustering(xt, xb, n_cluster)
         hub_ids = []
         for cluster in range(n_cluster):
-            hub_id = self.remove_antihub(xb[clusters==cluster], alpha)
-            hub_id = np.arange(xb.shape[0])[clusters==cluster][hub_id]
+            hub_id = self.remove_antihub(xb[clusters == cluster], alpha)
+            hub_id = np.arange(xb.shape[0])[clusters == cluster][hub_id]
             hub_ids.append(hub_id)
         hub_id = np.concatenate(hub_ids)
         if return_vecs:
